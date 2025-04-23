@@ -20,6 +20,8 @@ typedef enum {
     LAST_TOKEN_PUNCTUATION,
     STRIKETHROUGH_OPEN,
     STRIKETHROUGH_CLOSE,
+    HIGHLIGHT_OPEN,
+    HIGHLIGHT_CLOSE,
     LATEX_SPAN_START,
     LATEX_SPAN_CLOSE,
     UNCLOSED_SPAN
@@ -274,6 +276,68 @@ static bool parse_tilde(Scanner *s, TSLexer *lexer, const bool *valid_symbols) {
     return false;
 }
 
+static bool parse_highlight(Scanner *s, TSLexer *lexer, const bool *valid_symbols) {
+    lexer->advance(lexer, false);
+    // If `num_emphasis_delimiters_left` is not zero then we already decided
+    // that this should be part of an emphasis delimiter run, so interpret it as
+    // such.
+    if (s->num_emphasis_delimiters_left > 0) {
+        // The `STATE_EMPHASIS_DELIMITER_IS_OPEN` state flag tells us wether it
+        // should be open or close.
+        if ((s->state & STATE_EMPHASIS_DELIMITER_IS_OPEN) &&
+            valid_symbols[HIGHLIGHT_OPEN]) {
+            s->state &= (~STATE_EMPHASIS_DELIMITER_IS_OPEN);
+            lexer->result_symbol = HIGHLIGHT_OPEN;
+            s->num_emphasis_delimiters_left--;
+            return true;
+        }
+        if (valid_symbols[HIGHLIGHT_CLOSE]) {
+            lexer->result_symbol = HIGHLIGHT_CLOSE;
+            s->num_emphasis_delimiters_left--;
+            return true;
+        }
+    }
+    lexer->mark_end(lexer);
+    // Otherwise count the number of tildes
+    uint8_t star_count = 1;
+    while (lexer->lookahead == '=') {
+        star_count++;
+        lexer->advance(lexer, false);
+    }
+    bool line_end = lexer->lookahead == '\n' || lexer->lookahead == '\r' ||
+                    lexer->eof(lexer);
+    if (valid_symbols[HIGHLIGHT_OPEN] ||
+        valid_symbols[HIGHLIGHT_CLOSE]) {
+        // The desicion made for the first star also counts for all the
+        // following stars in the delimiter run. Rembemer how many there are.
+        s->num_emphasis_delimiters_left = star_count - 1;
+        // Look ahead to the next symbol (after the last star) to find out if it
+        // is whitespace punctuation or other.
+        bool next_symbol_whitespace =
+            line_end || lexer->lookahead == ' ' || lexer->lookahead == '\t';
+        bool next_symbol_punctuation = is_punctuation((char)lexer->lookahead);
+        // Information about the last token is in valid_symbols. See grammar.js
+        // for these tokens for how this is done.
+        if (valid_symbols[HIGHLIGHT_CLOSE] &&
+            !valid_symbols[LAST_TOKEN_WHITESPACE] &&
+            (!valid_symbols[LAST_TOKEN_PUNCTUATION] ||
+             next_symbol_punctuation || next_symbol_whitespace)) {
+            // Closing delimiters take precedence
+            s->state &= ~STATE_EMPHASIS_DELIMITER_IS_OPEN;
+            lexer->result_symbol = HIGHLIGHT_CLOSE;
+            return true;
+        }
+        if (!next_symbol_whitespace && (!next_symbol_punctuation ||
+                                        valid_symbols[LAST_TOKEN_PUNCTUATION] ||
+                                        valid_symbols[LAST_TOKEN_WHITESPACE])) {
+            s->state |= STATE_EMPHASIS_DELIMITER_IS_OPEN;
+            lexer->result_symbol = HIGHLIGHT_OPEN;
+            return true;
+        }
+    }
+    return false;
+}
+
 static bool parse_underscore(Scanner *s, TSLexer *lexer,
                              const bool *valid_symbols) {
     lexer->advance(lexer, false);
@@ -362,6 +426,8 @@ static bool scan(Scanner *s, TSLexer *lexer, const bool *valid_symbols) {
             return parse_underscore(s, lexer, valid_symbols);
         case '~':
             return parse_tilde(s, lexer, valid_symbols);
+        case '=':
+            return parse_highlight(s, lexer, valid_symbols);
     }
     return false;
 }

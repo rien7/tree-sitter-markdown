@@ -41,3 +41,6 @@ dist/
 bindings/c/
 bindings/swift/TreeSitterMarkdown/
 bindings/swift/TreeSitterMarkdownInline/
+
+# Zed editor
+.zed/
