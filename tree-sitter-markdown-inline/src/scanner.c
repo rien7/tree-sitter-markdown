@@ -304,6 +304,12 @@ static bool parse_highlight(Scanner *s, TSLexer *lexer, const bool *valid_symbol
         star_count++;
         lexer->advance(lexer, false);
     }
+
+    // Only proceed if exactly 2 equals signs are found
+    if (star_count != 2) {
+        return false;
+    }
+
     bool line_end = lexer->lookahead == '\n' || lexer->lookahead == '\r' ||
                     lexer->eof(lexer);
     if (valid_symbols[HIGHLIGHT_OPEN] ||
