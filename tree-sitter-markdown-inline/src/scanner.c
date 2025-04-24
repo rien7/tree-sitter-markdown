@@ -277,74 +277,49 @@ static bool parse_tilde(Scanner *s, TSLexer *lexer, const bool *valid_symbols) {
 }
 
 static bool parse_highlight(Scanner *s, TSLexer *lexer, const bool *valid_symbols) {
+    // 第一个 '='
     lexer->advance(lexer, false);
-    // If `num_emphasis_delimiters_left` is not zero then we already decided
-    // that this should be part of an emphasis delimiter run, so interpret it as
-    // such.
-    if (s->num_emphasis_delimiters_left > 0) {
-        // The `STATE_EMPHASIS_DELIMITER_IS_OPEN` state flag tells us wether it
-        // should be open or close.
-        if ((s->state & STATE_EMPHASIS_DELIMITER_IS_OPEN) &&
-            valid_symbols[HIGHLIGHT_OPEN]) {
-            s->state &= (~STATE_EMPHASIS_DELIMITER_IS_OPEN);
-            lexer->result_symbol = HIGHLIGHT_OPEN;
-            s->num_emphasis_delimiters_left--;
-            return true;
-        }
-        if (valid_symbols[HIGHLIGHT_CLOSE]) {
-            lexer->result_symbol = HIGHLIGHT_CLOSE;
-            s->num_emphasis_delimiters_left--;
-            return true;
-        }
+
+    // 检查是否有第二个 '='
+    if (lexer->lookahead != '=') {
+        return false;  // 必须有两个连续的等号
     }
+
+    // 消费第二个 '='
+    lexer->advance(lexer, false);
     lexer->mark_end(lexer);
-    // Otherwise count the number of tildes
-    uint8_t star_count = 1;
-    while (lexer->lookahead == '=') {
-        star_count++;
-        lexer->advance(lexer, false);
-    }
 
-    // Only proceed if exactly 2 equals signs are found
-    if (star_count != 2) {
-        return false;
-    }
-
-    if (valid_symbols[HIGHLIGHT_OPEN] && s->num_emphasis_delimiters_left > 0) {
+    // 确保没有第三个 '='（高亮标记必须严格是两个等号）
+    if (lexer->lookahead == '=') {
         return false;
     }
 
     bool line_end = lexer->lookahead == '\n' || lexer->lookahead == '\r' ||
-                    lexer->eof(lexer);
-    if (valid_symbols[HIGHLIGHT_OPEN] ||
-        valid_symbols[HIGHLIGHT_CLOSE]) {
-        // The desicion made for the first star also counts for all the
-        // following stars in the delimiter run. Rembemer how many there are.
-        s->num_emphasis_delimiters_left = star_count - 1;
-        // Look ahead to the next symbol (after the last star) to find out if it
-        // is whitespace punctuation or other.
-        bool next_symbol_whitespace =
-            line_end || lexer->lookahead == ' ' || lexer->lookahead == '\t';
-        bool next_symbol_punctuation = is_punctuation((char)lexer->lookahead);
-        // Information about the last token is in valid_symbols. See grammar.js
-        // for these tokens for how this is done.
-        if (valid_symbols[HIGHLIGHT_CLOSE] &&
-            !valid_symbols[LAST_TOKEN_WHITESPACE] &&
-            (!valid_symbols[LAST_TOKEN_PUNCTUATION] ||
-             next_symbol_punctuation || next_symbol_whitespace)) {
-            // Closing delimiters take precedence
-            s->state &= ~STATE_EMPHASIS_DELIMITER_IS_OPEN;
-            lexer->result_symbol = HIGHLIGHT_CLOSE;
-            return true;
-        }
-        if (!next_symbol_whitespace && (!next_symbol_punctuation ||
-                                        valid_symbols[LAST_TOKEN_PUNCTUATION] ||
-                                        valid_symbols[LAST_TOKEN_WHITESPACE])) {
-            s->state |= STATE_EMPHASIS_DELIMITER_IS_OPEN;
-            lexer->result_symbol = HIGHLIGHT_OPEN;
-            return true;
-        }
+                   lexer->eof(lexer);
+    bool next_symbol_whitespace =
+        line_end || lexer->lookahead == ' ' || lexer->lookahead == '\t';
+    bool next_symbol_punctuation = is_punctuation((char)lexer->lookahead);
+
+    // 判断这是开始标记还是结束标记
+    if (valid_symbols[HIGHLIGHT_CLOSE] &&
+        !valid_symbols[LAST_TOKEN_WHITESPACE] &&
+        (!valid_symbols[LAST_TOKEN_PUNCTUATION] ||
+         next_symbol_punctuation || next_symbol_whitespace)) {
+        // 这是一个结束标记
+        lexer->result_symbol = HIGHLIGHT_CLOSE;
+        return true;
     }
+
+    if (valid_symbols[HIGHLIGHT_OPEN] &&
+        !next_symbol_whitespace &&
+        (!next_symbol_punctuation ||
+         valid_symbols[LAST_TOKEN_PUNCTUATION] ||
+         valid_symbols[LAST_TOKEN_WHITESPACE])) {
+        // 这是一个开始标记
+        lexer->result_symbol = HIGHLIGHT_OPEN;
+        return true;
+    }
+
     return false;
 }
 
