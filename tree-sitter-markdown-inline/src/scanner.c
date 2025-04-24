@@ -310,6 +310,10 @@ static bool parse_highlight(Scanner *s, TSLexer *lexer, const bool *valid_symbol
         return false;
     }
 
+    if (valid_symbols[HIGHLIGHT_OPEN] && s->num_emphasis_delimiters_left > 0) {
+        return false;
+    }
+
     bool line_end = lexer->lookahead == '\n' || lexer->lookahead == '\r' ||
                     lexer->eof(lexer);
     if (valid_symbols[HIGHLIGHT_OPEN] ||
