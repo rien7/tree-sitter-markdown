@@ -1,5 +1,10 @@
 ;From nvim-treesitter/nvim-treesitter
-(atx_heading (inline) @text.title)
+(atx_heading (inline) @text.title(#atx_h1_marker (_) @text.title.1)
+(#atx_h2_marker (_) @text.title.2)
+(#atx_h3_marker (_) @text.title.3)
+(#atx_h4_marker (_) @text.title.4)
+(#atx_h5_marker (_) @text.title.5)
+(#atx_h6_marker (_) @text.title.6))
 (setext_heading (paragraph) @text.title)
 
 [
