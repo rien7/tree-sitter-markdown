@@ -13,6 +13,12 @@
 
 (strong_emphasis) @text.strong
 
+(highlight) @text.highlight
+
+(strikethrough) @text.strikethrough
+
+(code_span) @text.code
+
 [
   (link_destination)
   (uri_autolink)
@@ -32,6 +38,4 @@
 (image ["!" "[" "]" "(" ")"] @punctuation.delimiter)
 (inline_link ["[" "]" "(" ")"] @punctuation.delimiter)
 (shortcut_link ["[" "]"] @punctuation.delimiter)
-
-; NOTE: extension not enabled by default
-; (wiki_link ["[" "|" "]"] @punctuation.delimiter)
+(wiki_link ["[" "|" "]"] @punctuation.delimiter)
