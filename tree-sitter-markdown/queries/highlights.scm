@@ -1,22 +1,53 @@
 ;From nvim-treesitter/nvim-treesitter
-(atx_heading (inline) @text.title(#atx_h1_marker (_) @text.title.1)
-(#atx_h2_marker (_) @text.title.2)
-(#atx_h3_marker (_) @text.title.3)
-(#atx_h4_marker (_) @text.title.4)
-(#atx_h5_marker (_) @text.title.5)
-(#atx_h6_marker (_) @text.title.6))
-(setext_heading (paragraph) @text.title)
+; 为 atx_heading 根据 marker 类型标记整个节点为 h1-h6
+(atx_heading
+  (atx_h1_marker) @punctuation.special
+  (inline) @text.title
+) @text.title.h1
+(#set! capture.final true)
 
-[
-  (atx_h1_marker)
-  (atx_h2_marker)
-  (atx_h3_marker)
-  (atx_h4_marker)
-  (atx_h5_marker)
-  (atx_h6_marker)
-  (setext_h1_underline)
-  (setext_h2_underline)
-] @punctuation.special
+(atx_heading
+  (atx_h2_marker) @punctuation.special
+  (inline) @text.title
+) @text.title.h2
+(#set! capture.final true)
+
+(atx_heading
+  (atx_h3_marker) @punctuation.special
+  (inline) @text.title
+) @text.title.h3
+(#set! capture.final true)
+
+(atx_heading
+  (atx_h4_marker) @punctuation.special
+  (inline) @text.title
+) @text.title.h4
+(#set! capture.final true)
+
+(atx_heading
+  (atx_h5_marker) @punctuation.special
+  (inline) @text.title
+) @text.title.h5
+(#set! capture.final true)
+
+(atx_heading
+  (atx_h6_marker) @punctuation.special
+  (inline) @text.title
+) @text.title.h6
+(#set! capture.final true)
+
+; 保留 setext_heading 的高亮规则，并标记整个节点
+(setext_heading
+  (paragraph) @text.title
+  (setext_h1_underline) @punctuation.special
+) @text.title.h1
+(#set! capture.final true)
+
+(setext_heading
+  (paragraph) @text.title
+  (setext_h2_underline) @punctuation.special
+) @text.title.h2
+(#set! capture.final true)
 
 [
   (link_title)
