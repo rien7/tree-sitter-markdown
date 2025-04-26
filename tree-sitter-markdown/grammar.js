@@ -130,8 +130,8 @@ module.exports = grammar({
             optional($._atx_heading_content),
             $._newline
         )),
-        _atx_heading_content: $ => prec(1, seq(
-            optional($._whitespace),
+        _atx_heading_content: $ => prec(1, choice(
+            seq($._whitespace, optional(field('heading_content', alias($._line, $.inline)))),
             field('heading_content', alias($._line, $.inline))
         )),
 

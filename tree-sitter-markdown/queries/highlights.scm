@@ -2,37 +2,37 @@
 ; 为 atx_heading 根据 marker 类型标记整个节点为 h1-h6
 (atx_heading
   (atx_h1_marker) @punctuation.special
-  (inline) @text.title
+  [(inline) @text.title]?
 ) @text.title.h1
 (#set! capture.final true)
 
 (atx_heading
   (atx_h2_marker) @punctuation.special
-  (inline) @text.title
+  [(inline) @text.title]?
 ) @text.title.h2
 (#set! capture.final true)
 
 (atx_heading
   (atx_h3_marker) @punctuation.special
-  (inline) @text.title
+  [(inline) @text.title]?
 ) @text.title.h3
 (#set! capture.final true)
 
 (atx_heading
   (atx_h4_marker) @punctuation.special
-  (inline) @text.title
+  [(inline) @text.title]?
 ) @text.title.h4
 (#set! capture.final true)
 
 (atx_heading
   (atx_h5_marker) @punctuation.special
-  (inline) @text.title
+  [(inline) @text.title]?
 ) @text.title.h5
 (#set! capture.final true)
 
 (atx_heading
   (atx_h6_marker) @punctuation.special
-  (inline) @text.title
+  [(inline) @text.title]?
 ) @text.title.h6
 (#set! capture.final true)
 

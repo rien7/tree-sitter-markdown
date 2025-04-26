@@ -593,7 +593,10 @@ static bool parse_atx_heading(Scanner *s, TSLexer *lexer,
             advance(s, lexer);
             level++;
         }
-        if (level <= 6 && !lexer->eof(lexer)) {
+        if (level <= 6 &&
+            (lexer->lookahead == ' ' || lexer->lookahead == '\t' ||
+             lexer->lookahead == '\n' || lexer->lookahead == '\r') ||
+             lexer->eof(lexer)) {
             lexer->result_symbol = ATX_H1_MARKER + (level - 1);
             s->indentation = 0;
             mark_end(s, lexer);
