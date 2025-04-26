@@ -100,32 +100,32 @@ module.exports = grammar({
         // parsed using normal tree-sitter rules.
         //
         // https://github.github.com/gfm/#atx-headings
-        _atx_heading1: $ => prec(2, seq(
+        _atx_heading1: $ => prec(1, seq(
             $.atx_h1_marker,
             optional($._atx_heading_content),
             $._newline
         )),
-        _atx_heading2: $ => prec(2, seq(
+        _atx_heading2: $ => prec(1, seq(
             $.atx_h2_marker,
             optional($._atx_heading_content),
             $._newline
         )),
-        _atx_heading3: $ => prec(2, seq(
+        _atx_heading3: $ => prec(1, seq(
             $.atx_h3_marker,
             optional($._atx_heading_content),
             $._newline
         )),
-        _atx_heading4: $ => prec(2, seq(
+        _atx_heading4: $ => prec(1, seq(
             $.atx_h4_marker,
             optional($._atx_heading_content),
             $._newline
         )),
-        _atx_heading5: $ => prec(2, seq(
+        _atx_heading5: $ => prec(1, seq(
             $.atx_h5_marker,
             optional($._atx_heading_content),
             $._newline
         )),
-        _atx_heading6: $ => prec(2, seq(
+        _atx_heading6: $ => prec(1, seq(
             $.atx_h6_marker,
             optional($._atx_heading_content),
             $._newline
@@ -582,12 +582,6 @@ module.exports = grammar({
         $._pipe_table_line_ending,
     ],
     precedences: $ => [
-        [$._atx_heading1, $.paragraph],
-        [$._atx_heading2, $.paragraph],
-        [$._atx_heading3, $.paragraph],
-        [$._atx_heading4, $.paragraph],
-        [$._atx_heading5, $.paragraph],
-        [$._atx_heading6, $.paragraph],
         [$._setext_heading1, $._block],
         [$._setext_heading2, $._block],
         [$.indented_code_block, $._block],
