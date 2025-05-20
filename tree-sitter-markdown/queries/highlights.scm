@@ -1,5 +1,3 @@
-;From nvim-treesitter/nvim-treesitter
-; 为 atx_heading 根据 marker 类型标记整个节点为 h1-h6
 (atx_heading
   (atx_h1_marker) @punctuation.special
   [(inline) @text.title]?
@@ -36,7 +34,6 @@
 ) @text.title.h6
 (#set! capture.final true)
 
-; 保留 setext_heading 的高亮规则，并标记整个节点
 (setext_heading
   (paragraph) @text.title
   (setext_h1_underline) @punctuation.special
@@ -86,3 +83,11 @@
 [
   (backslash_escape)
 ] @string.escape
+
+[
+  (paragraph)
+] @paragraph
+
+[
+  (block_quote)
+] @block_quote
