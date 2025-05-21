@@ -89,5 +89,9 @@
 ] @paragraph
 
 [
+  (inline)
+] @inline
+
+[
   (block_quote)
 ] @block_quote
